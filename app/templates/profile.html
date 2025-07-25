@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<h2 class="page-heading">Welcome, {{ current_user.name }}</h2>
+
+<ul>
+  <li><strong>Email:</strong> {{ current_user.email }}</li>
+  <li><strong>Phone:</strong> {{ current_user.phone }}</li>
+  <li><strong>Address:</strong> {{ current_user.address }}</li>
+</ul>
+
+<div style="margin-top: var(--spacing-xl); display: flex; gap: var(--spacing-lg); flex-wrap: wrap;">
+  <a class="btn" href="{{ url_for('main.update_profile') }}">Edit Profile</a>
+  <a class="btn" href="{{ url_for('main.export_pdf') }}">Export CV as PDF</a>
+</div>
+{% endblock %}

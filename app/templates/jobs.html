@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Available Jobs{% endblock %}
+
+{% block content %}
+<h2 class="page-heading">Available Jobs</h2>
+
+<div class="card-container" id="job-list">
+  <p>Loading jobs...</p>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    fetch('/api/v1/jobs')
+      .then(response => response.json())
+      .then(data => {
+        const jobList = document.getElementById('job-list');
+        jobList.innerHTML = '';
+
+        if (data.length === 0) {
+          jobList.innerHTML = `
+            <div class="no-applications">
+              <p>No jobs available at the moment. Please check back later!</p>
+            </div>
+          `;
+          return;
+        }
+
+        data.forEach(job => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <h3 class="job-title">${job.title}</h3>
+            <p class="job-company"> ${job.company}</p>
+            <br>
+            <a class="btn" href="/jobs/${job.id}">View Details</a>
+          `;
+          jobList.appendChild(card);
+        });
+      })
+      .catch(error => {
+        console.error('Error loading jobs:', error);
+        document.getElementById('job-list').innerHTML = `
+          <div class="no-applications">
+            <p>Failed to load jobs. Please try again later.</p>
+          </div>
+        `;
+      });
+  });
+</script>
+{% endblock %}

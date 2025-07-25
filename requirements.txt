@@ -1,0 +1,10 @@
+Flask
+Flask-WTF
+Flask-Login
+Flask-SQLAlchemy
+WTForms
+Werkzeug
+fpdf
+email_validator
+uuid
+jsonify

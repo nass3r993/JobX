@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}My Applications{% endblock %}
+{% block content %}
+<h2 class="page-heading">My Applications</h2>
+
+<div class="applications-wrapper">
+  {% for app in apps %}
+    <div class="application-card">
+      <div class="application-details">
+        <div class="job-title">Applied to <span>{{ app.job.title }}</span></div>
+      </div>
+<form method="POST" action="{{ url_for('main.remove_application', app_id=app.id) }}" style="background-color: inherit !important; box-shadow: none !important; margin: 0px !important; border: none !important">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <button type="submit" class="btn-remove" onclick="return confirm('Are you sure you want to remove this application?');" style="padding: 20px; font-size: 16px">
+     Cancel application
+  </button>
+</form>
+
+    </div>
+  {% else %}
+    <p class="no-applications">You haven't applied to any jobs yet.</p>
+  {% endfor %}
+</div>
+{% endblock %}
