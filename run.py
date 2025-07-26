@@ -19,7 +19,7 @@ def seed_data():
                 experience=None,    # optional
                 education=None,     # optional
                 skills=None,        # optional, comma-separated string like "Python, Flask"
-                password=generate_password_hash("dummy123")
+                password=generate_password_hash("%2Bj^EIl$KE0(}984*)(#@)")
             )
             db.session.add(user)
             db.session.commit()
