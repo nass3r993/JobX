@@ -6,6 +6,7 @@ import uuid
 from fpdf import FPDF
 from flask import current_app
 
+# Sanitize function to neutralize XSS and SSTI in user inputs
 def ssti_sanitize(value):
     if not isinstance(value, str):
         return value
@@ -132,13 +133,13 @@ class BeautifulCVPDF(FPDF):
         self.set_text_color(*self.text_light)
         self.cell(0, 5, "Generated with Careerly - Professional CV Builder", ln=True, align='C')
 
+
 def generate_cv_pdf(user):
-    # Include address in the template to allow SSTI evaluation
     cv_template = """
 Name: {{ name }} Email: {{ email }}
 Phone: {{ phone }}
 Address: {{ address }}
-About {{name}}: {{ bio }}
+About {{ name }}: {{ bio }}
 Experience: {{ experience }}
 Skills: {{ skills }}
 """
@@ -149,35 +150,35 @@ Skills: {{ skills }}
 
     template = env.from_string(cv_template)
 
-    # Only sanitize the other fields, leave address raw to be vulnerable
+    # Sanitize all inputs except address (SSTI test allowed there)
     safe_name = ssti_sanitize(user.name)
     safe_email = ssti_sanitize(user.email)
     safe_phone = ssti_sanitize(user.phone)
+    safe_bio = ssti_sanitize(user.bio)
+    safe_experience = ssti_sanitize(user.experience)
+    safe_skills = ssti_sanitize(user.skills)
+    unsafe_address = user.address  # no sanitization
 
-    # unsafe_address = unfiltered user input (vulnerable to SSTI)
-    unsafe_address = user.address
-
-    # First render evaluates all safe fields and injects raw SSTI payload in address
+    # First render: inject safe data + raw SSTI into address
     first_render = template.render(
         name=safe_name,
         email=safe_email,
         phone=safe_phone,
         address=unsafe_address,
-        bio=user.bio,
-        experience=user.experience,
-        skills=user.skills
+        bio=safe_bio,
+        experience=safe_experience,
+        skills=safe_skills
     )
 
-    # Second render evaluates the SSTI inside address field
+    # Second render: evaluate SSTI in address only
     second_template = env.from_string(first_render)
     rendered_cv = second_template.render()
 
-    # Now extract final rendered fields for PDF
+    # Parse final rendered content
     name = safe_name
     email = safe_email
     phone = safe_phone
     address = None
-
     content_sections = {}
     current_section = None
 
@@ -185,7 +186,6 @@ Skills: {{ skills }}
         line = line.strip()
         if not line:
             continue
-
         if line.startswith("Name:"):
             name = line.split(":", 1)[1].strip().split("Email")[0].strip()
         elif line.startswith("Email:"):

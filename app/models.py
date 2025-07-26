@@ -24,8 +24,8 @@ class Job(db.Model):
     title = db.Column(db.String(100))
     description = db.Column(db.Text)
     company = db.Column(db.String(100))
-    salary = db.Column(db.String(50))  # e.g., "$3,000 - $4,500"
-    job_type = db.Column(db.String(20))  # e.g., "Full-time", "Part-time", "Contract"
+    salary = db.Column(db.String(50))  
+    job_type = db.Column(db.String(20))  
     location = db.Column(db.String(100))
     posted_date = db.Column(db.Date, default=datetime.utcnow)
     application_deadline = db.Column(db.Date, default=lambda: datetime.utcnow() + timedelta(days=30))
