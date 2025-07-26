@@ -1,151 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}JobX - Find Your Dream Job{% endblock %}</title>
-  
-  <!-- Preconnect to Google Fonts for performance -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  
-  <!-- Inter Font Family -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <!-- Font Awesome CDN -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-papb9tC+Y4W0Mtv8z9EvbPvNv6FL6T2uQvlUZlLXBLqXHq9Ywr+uDZCb6nYu/gFqf4lhAzbNVo5S3k1b1QY1Tw==" crossorigin="anonymous" referrerpolicy="no-referrer"/>
-
-  
-  <!-- Main Stylesheet -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-  
-  <!-- Meta tags for SEO -->
-  <meta name="description" content="Find your dream job with JobX - the modern platform connecting talented professionals with amazing opportunities.">
-  <meta name="keywords" content="jobs, careers, employment, hiring, job search">
-  <meta name="author" content="JobX">
-  
-  <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💼</text></svg>">
-  
-  {% block head %}{% endblock %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Careerly{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    </style>
 </head>
-<body>
-  <!-- Enhanced Navigation -->
-<!-- Enhanced Navigation -->
-<nav role="navigation" aria-label="Main navigation">
-  <div class="nav-container">
-    <a href="/" aria-label="JobX Home">
-      JobX
-    </a>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="{{ url_for('main.home') }}" class="flex items-center space-x-2 text-xl font-bold text-blue-600 hover:text-blue-700 transition-colors">
+                        <i data-lucide="briefcase" class="h-8 w-8"></i>
+                        <span>Careerly</span>
+                    </a>
+                </div>
 
-    {% if current_user.is_authenticated %}
-      <a href="{{ url_for('main.profile') }}" aria-label="User Profile">
-        Profile
-      </a>
+                <div class="flex items-center space-x-8">
+                    {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('main.home') }}" class="flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors">
+                            <i data-lucide="home" class="h-4 w-4"></i>
+                            <span>Home</span>
+                        </a>
+                        <a href="{{ url_for('main.jobs') }}" class="flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors">
+                            <i data-lucide="briefcase" class="h-4 w-4"></i>
+                            <span>Jobs</span>
+                        </a>
+                        <a href="{{ url_for('main.my_applications') }}" class="flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors">
+                            <i data-lucide="file-text" class="h-4 w-4"></i>
+                            <span>My Applications</span>
+                        </a>
+                        <a href="{{ url_for('main.profile') }}" class="flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors">
+                            <i data-lucide="user" class="h-4 w-4"></i>
+                            <span>Profile</span>
+                        </a>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-sm text-gray-600">Welcome, {{ current_user.name }}</span>
+                            <a href="{{ url_for('main.logout') }}" class="flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors">
+                                <i data-lucide="log-out" class="h-4 w-4"></i>
+                                <span>Logout</span>
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="flex items-center space-x-4">
+                            <a href="{{ url_for('main.login') }}" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                                Login
+                            </a>
+                            <a href="{{ url_for('main.register') }}" class="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                                Register
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
 
-      <a href="{{ url_for('main.jobs') }}" aria-label="Browse Jobs">
-        Jobs
-      </a>
-
-      <a href="{{ url_for('main.my_applications') }}" aria-label="My Applications">
-        Applications
-      </a>
-
-      <a href="{{ url_for('main.logout') }}" aria-label="Logout">
-        Logout
-      </a>
-    {% else %}
-      <a href="{{ url_for('main.login') }}" aria-label="Login">
-        Login
-      </a>
-      <a href="{{ url_for('main.register') }}" aria-label="Register">
-        Register
-      </a>
-    {% endif %}
-  </div>
-</nav>
-
-
-
-
-
-  <!-- Main Content -->
-  <main role="main">
     <!-- Flash Messages -->
     {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <ul class="flash" role="alert" aria-live="polite">
-          {% for msg in messages %}
-            <li>{{ msg }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
+        {% if messages %}
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+                {% for message in messages %}
+                    <div class="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded mb-4">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
     {% endwith %}
-    
-    <!-- Page Content -->
-    {% block content %}{% endblock %}
-  </main>
 
-  <!-- Optional: Add a subtle loading animation -->
-  <script>
-    // Add smooth loading animation
-    document.addEventListener('DOMContentLoaded', function() {
-      const cards = document.querySelectorAll('.card');
-      const applications = document.querySelectorAll('.application-card');
-      
-      // Stagger card animations
-      cards.forEach((card, index) => {
-        card.style.animationDelay = `${index * 0.1}s`;
-      });
-      
-      // Stagger application animations
-      applications.forEach((app, index) => {
-        app.style.animationDelay = `${index * 0.1}s`;
-      });
-    });
-    
-    // Add interactive button effects
-    document.addEventListener('DOMContentLoaded', function() {
-      const buttons = document.querySelectorAll('.btn');
-      
-      buttons.forEach(button => {
-        button.addEventListener('click', function(e) {
-          // Create ripple effect
-          const ripple = document.createElement('span');
-          const rect = this.getBoundingClientRect();
-          const size = Math.max(rect.width, rect.height);
-          const x = e.clientX - rect.left - size / 2;
-          const y = e.clientY - rect.top - size / 2;
-          
-          ripple.style.cssText = `
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(0);
-            animation: ripple 0.6s ease-out;
-            left: ${x}px;
-            top: ${y}px;
-            width: ${size}px;
-            height: ${size}px;
-            pointer-events: none;
-          `;
-          
-          this.appendChild(ripple);
-          
-          setTimeout(() => {
-            ripple.remove();
-          }, 600);
-        });
-      });
-    });
-  </script>
-  
-  <style>
-    @keyframes ripple {
-      to {
-        transform: scale(2);
-        opacity: 0;
-      }
-    }
-  </style>
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        lucide.createIcons();
+    </script>
 </body>
 </html>

@@ -1,4 +1,9 @@
-from sqlalchemy.exc import IntegrityError  
+from flask import request
+from sqlalchemy import text
+from flask import request, jsonify
+from sqlalchemy import or_
+from sqlalchemy.sql import text
+from sqlalchemy.exc import IntegrityError
 from flask import jsonify
 from flask import Blueprint, render_template, redirect, url_for, request, flash, send_file
 from flask import render_template_string
@@ -23,34 +28,64 @@ class EmptyForm(FlaskForm):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+
+login_manager.login_view = 'main.home'
+
+@login_manager.unauthorized_handler
+def unauthorized_callback():
+    flash("You must be logged in to view that page.", "warning")
+    return redirect(url_for('main.home'))
+
 @bp.route('/')
 def home():
     return render_template('home.html', user=current_user)
 
 @bp.route('/register', methods=['GET', 'POST'])
 def register():
-    form = RegisterForm()
-    if form.validate_on_submit():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        email = request.form.get('email')
+        phone = request.form.get('phone')
+        address = request.form.get('address')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirmPassword')
+        csrf_token = request.form.get('csrf_token')
+
+        # If using Flask-WTF CSRF protection globally
+        from flask_wtf.csrf import validate_csrf
         try:
-            hashed_pw = generate_password_hash(form.password.data)
+            validate_csrf(csrf_token)
+        except Exception:
+            flash("Invalid CSRF token", "danger")
+            return render_template('register.html')
+
+        if not all([name, email, phone, address, password, confirm_password]):
+            flash("All fields are required.", "danger")
+            return render_template('register.html')
+
+        if password != confirm_password:
+            flash("Passwords do not match.", "danger")
+            return render_template('register.html')
+
+        try:
+            hashed_pw = generate_password_hash(password)
             user = User(
-                email=form.email.data,
-                name=form.name.data,
-                phone=form.phone.data,
-                address=form.address.data,
+                name=name,
+                email=email,
+                phone=phone,
+                address=address,
                 password=hashed_pw
             )
             db.session.add(user)
             db.session.commit()
             flash("Registration successful. Please log in.", "success")
-            return redirect(url_for('main.login'))
-
+            return redirect(url_for('main.login'))  # make sure this route exists
         except IntegrityError:
             db.session.rollback()
-            flash("Email already exists. Please choose a different one.", "danger")
-            return render_template('register.html', form=form)
+            flash("Email already exists.", "danger")
+            return render_template('register.html')
 
-    return render_template('register.html', form=form)
+    return render_template('register.html')
 
 
 
@@ -76,20 +111,37 @@ def logout():
 def profile():
     return render_template('profile.html')
 
-@bp.route('/profile/update', methods=['GET', 'POST'])
+
+
+@bp.route('/profile/update', methods=['POST'])
 @login_required
 def update_profile():
-    form = UpdateProfileForm(obj=current_user)
+    # Get form data directly from POST
+    first_name = request.form.get('firstName', '').strip()
+    phone = request.form.get('phone', '').strip()
+    location = request.form.get('location', '').strip()
+    bio = request.form.get('bio', '').strip()
+    experience = request.form.get('experience', '').strip()
+    skills = request.form.get('skills', '').strip()
 
-    if form.validate_on_submit():
-        current_user.name = form.name.data
-        current_user.phone = form.phone.data
-        current_user.address = form.address.data
+    # Update user fields
+    current_user.name = first_name
+    current_user.phone = phone
+    current_user.address = location
+    current_user.bio = bio
+    current_user.experience = experience
+    current_user.skills = skills
+
+    try:
         db.session.commit()
         flash('Your profile has been updated.', 'success')
-        return redirect(url_for('main.profile'))
+    except Exception as e:
+        db.session.rollback()
+        flash('An error occurred while updating your profile.', 'error')
+        # Optionally log the error here
 
-    return render_template('update_profile.html', form=form)
+    return redirect(url_for('main.profile'))
+
 
 @bp.route('/profile/export')
 @login_required
@@ -104,19 +156,58 @@ def jobs():
     return render_template('jobs.html')
 
 
+
+
 @bp.route('/api/v1/jobs')
 @login_required
 def api_jobs():
-    jobs = Job.query.all()
+    search = request.args.get('search', '', type=str).strip()
+    job_type = request.args.get('type', '', type=str).strip()
+    location = request.args.get('location', '', type=str).strip()
+
+    query = Job.query
+
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(
+            or_(
+                Job.title.ilike(search_term),
+                Job.company.ilike(search_term)
+            )
+        )
+
+    if job_type:
+        query = query.filter(Job.job_type == job_type)
+
+    # ⚠️ SQLi-vulnerable partial match
+    if location:
+        unsafe_condition = f"LOWER(location) LIKE '%%{location.lower()}%%'"
+        query = query.filter(text(unsafe_condition))
+
+    jobs = query.all()
+
+    if not jobs:
+        return jsonify([]), 200
+
     jobs_data = []
     for job in jobs:
-        poster = job.poster
         jobs_data.append({
             'id': job.id,
             'title': job.title,
-            'company': job.company
+            'company': job.company,
+            'salary': job.salary,
+            'job_type': job.job_type,
+            'location': job.location,
+            'posted_date': job.posted_date.isoformat() if job.posted_date else None,
+            'application_deadline': job.application_deadline.isoformat() if job.application_deadline else None
         })
+
     return jsonify(jobs_data)
+
+
+
+
+
 
 @bp.route('/jobs/<string:job_id>')
 @login_required
@@ -133,15 +224,20 @@ def api_job_detail(job_id):
     if request.method == 'GET':
         poster = job.poster
         return jsonify({
-            'id': job.id,
-            'title': job.title,
-            'company': job.company,
-            'description': job.description,
-            'posted_by': job.posted_by,
-            'poster_email': poster.email if poster else "N/A",
-            'poster_phone': poster.phone if poster else "N/A",
-            'poster_address': poster.address if poster else "N/A"
-        })
+        "id": job.id,
+        "title": job.title,
+        "description": job.description,
+        "company": job.company,
+        "salary": job.salary,
+        "job_type": job.job_type,
+        "location": job.location,
+        "posted_date": job.posted_date.isoformat(),
+        "application_deadline": job.application_deadline.isoformat(),
+        'posted_by': job.posted_by,
+        'poster_email': poster.email if poster else "N/A",
+        'poster_phone': poster.phone if poster else "N/A",
+        'poster_address': poster.address if poster else "N/A"
+    })
 
     # PATCH: update fields except id
     if request.method == 'PATCH':
@@ -188,9 +284,17 @@ def apply(job_id):
 @bp.route('/applications')
 @login_required
 def my_applications():
-    apps = Application.query.filter_by(user_id=current_user.id).all()
+    status_filter = request.args.get('status')
+
+    # Filter by user and optionally by status
+    query = Application.query.filter_by(user_id=current_user.id)
+    if status_filter:
+        query = query.filter_by(status=status_filter)
+
+    applications = query.all()
     form = EmptyForm()
-    return render_template('applications.html', apps=apps, form=form)
+    return render_template('applications.html', applications=applications, form=form)
+
 
 
 @bp.route('/applications/<int:app_id>/remove', methods=['POST'])

@@ -1,24 +1,98 @@
-{% extends 'base.html' %}
-{% block title %}My Applications{% endblock %}
+{% extends "base.html" %}
+
+{% block title %}My Applications - JobPortal{% endblock %}
+
 {% block content %}
-<h2 class="page-heading">My Applications</h2>
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">My Applications</h1>
+            <p class="text-gray-600">Track the status of your job applications</p>
+        </div>
 
-<div class="applications-wrapper">
-  {% for app in apps %}
-    <div class="application-card">
-      <div class="application-details">
-        <div class="job-title">Applied to <span>{{ app.job.title }}</span></div>
-      </div>
-<form method="POST" action="{{ url_for('main.remove_application', app_id=app.id) }}" style="background-color: inherit !important; box-shadow: none !important; margin: 0px !important; border: none !important">
-  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-  <button type="submit" class="btn-remove" onclick="return confirm('Are you sure you want to remove this application?');" style="padding: 20px; font-size: 16px">
-     Cancel application
-  </button>
-</form>
+        <!-- Filter -->
+        <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+            <form method="GET" class="flex items-center space-x-4">
+                <i data-lucide="filter" class="h-5 w-5 text-gray-400"></i>
+                <select name="status" onchange="this.form.submit()" class="border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">All Statuses</option>
+                    <option value="Pending" {{ 'selected' if request.args.get('status') == 'Pending' }}>Pending</option>
+                    <option value="Under Review" {{ 'selected' if request.args.get('status') == 'Under Review' }}>Under Review</option>
+                    <option value="Accepted" {{ 'selected' if request.args.get('status') == 'Accepted' }}>Accepted</option>
+                    <option value="Rejected" {{ 'selected' if request.args.get('status') == 'Rejected' }}>Rejected</option>
+                </select>
+                <span class="text-sm text-gray-600">
+                    Showing {{ applications|length }} applications
+                </span>
+            </form>
+        </div>
 
+        <!-- Applications List -->
+        {% if applications|length == 0 %}
+            <div class="text-center py-12">
+                <div class="text-gray-400 mb-4">
+                    <i data-lucide="file-text" class="h-12 w-12 mx-auto"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No applications yet</h3>
+                <p class="text-gray-600 mb-4">Start applying to jobs to see them here</p>
+                <a href="{{ url_for('main.jobs') }}" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                    Browse Jobs
+                </a>
+            </div>
+        {% else %}
+            <div class="space-y-4">
+                {% for application in applications %}
+                    <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-semibold text-gray-900 mb-1">
+                                        {{ application.job.title }}
+                                    </h3>
+                                    <div class="flex items-center text-gray-600 mb-2">
+                                        <i data-lucide="building" class="h-4 w-4 mr-1"></i>
+                                        <span>{{ application.job.company }}</span>
+                                    </div>
+                                </div>
+                                <span class="px-3 py-1 rounded-full text-sm font-medium
+                                    {% if application.status == 'Pending' %}bg-yellow-100 text-yellow-800
+                                    {% elif application.status == 'Under Review' %}bg-blue-100 text-blue-800
+                                    {% elif application.status == 'Accepted' %}bg-green-100 text-green-800
+                                    {% elif application.status == 'Rejected' %}bg-red-100 text-red-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ application.status }}
+                                </span>
+                            </div>
+
+                            <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-4">
+                                <div class="flex items-center">
+                                    
+                                    
+                                </div>
+                                
+                            </div>
+
+
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <i data-lucide="calendar" class="h-4 w-4 mr-1"></i>
+                                    Applied {{ application.applied_date.strftime('%B %d, %Y') }}
+                                </div>
+
+                                <form method="POST" action="{{ url_for('main.remove_application', app_id=application.id) }}" onsubmit="return confirm('Are you sure you want to cancel this application?');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit"
+                                            class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
+                                    >
+                                        Cancel application
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
     </div>
-  {% else %}
-    <p class="no-applications">You haven't applied to any jobs yet.</p>
-  {% endfor %}
 </div>
 {% endblock %}

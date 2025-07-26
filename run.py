@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from app import create_app, db
 from app.models import Job, User
 from werkzeug.security import generate_password_hash
@@ -8,161 +9,167 @@ def seed_data():
     with app.app_context():
         db.create_all()
 
-        if not User.query.filter_by(email="hr@example.com").first():
+        if not User.query.filter_by(email="admin@Careerly.com").first():
             user = User(
-                email="hr@example.com",
-                name="HR Manager",
-                phone="0555555555",
+                email="admin@Careerly.com",
+                name="Nasser Mohammed",
+                phone="05399997502",
                 address="Riyadh, Saudi Arabia",
+                bio=None,           # optional, can omit or set a string
+                experience=None,    # optional
+                education=None,     # optional
+                skills=None,        # optional, comma-separated string like "Python, Flask"
                 password=generate_password_hash("dummy123")
             )
             db.session.add(user)
             db.session.commit()
+
 
         if not Job.query.first():
             jobs = [
                 Job(
                     title="Restaurant Manager",
                     company="Savory Bites Co.",
-                    description="""
-                    <br><h4>Lead Our Team to Success</h4>
-                    <p>We're looking for an experienced Restaurant Manager to oversee daily operations, manage staff, and ensure exceptional customer service in a fast-paced dining environment. You’ll be instrumental in upholding brand standards and fostering a team-focused atmosphere.</p><br>
-                    <ul>
-                        <li>Manage inventory, vendor relationships, and supply orders</li>
-                        <li>Maintain high food safety and sanitation standards</li>
-                        <li>Recruit, train, and develop front and back-of-house staff</li>
-                        <li>Ensure smooth daily operations and resolve customer issues effectively</li>
-                        <li>Optimize scheduling and labor costs</li>
-                    </ul>
-                    """,
+                    salary="$4,000 - $5,000",
+                    job_type="Full-time",
+                    location="Riyadh, Saudi Arabia",
+                    posted_date=datetime.utcnow(),
+                    application_deadline=datetime.utcnow() + timedelta(days=30),
+                    description=(
+                        "As the Restaurant Manager at Savory Bites Co., you will oversee all daily operations, "
+                        "ensuring excellent customer service, staff management, and smooth workflow. "
+                        "You will coordinate with kitchen staff, handle budgeting and inventory, and develop "
+                        "strategies to boost sales and customer satisfaction. The ideal candidate has proven leadership skills, "
+                        "strong organizational abilities, and experience in the food and beverage industry. "
+                        "You will foster a positive work environment while maintaining compliance with health and safety standards."
+                    ),
                     posted_by=1
                 ),
                 Job(
                     title="Marketing Specialist",
                     company="BrightWave Media",
-                    description="""
-                    <br><h4>Drive Brand Awareness and Growth</h4>
-                    <p>We're hiring a data-driven and creative Marketing Specialist to develop, execute, and monitor marketing campaigns across various platforms. The role requires a deep understanding of digital media, brand strategy, and analytics to help elevate our presence and drive revenue.</p><br>
-                    <ul>
-                        <li>Design and execute multichannel marketing campaigns</li>
-                        <li>Create compelling content for social, email, and paid ads</li>
-                        <li>Track KPIs and report on performance metrics</li>
-                        <li>Work with cross-functional teams including product and sales</li>
-                        <li>Maintain consistency with brand identity and messaging</li>
-                    </ul>
-                    """,
+                    salary="$3,500 - $4,500",
+                    job_type="Full-time",
+                    location="Jeddah, Saudi Arabia",
+                    posted_date=datetime.utcnow(),
+                    application_deadline=datetime.utcnow() + timedelta(days=30),
+                    description=(
+                        "BrightWave Media is seeking a creative and analytical Marketing Specialist to join our team. "
+                        "You will design, implement, and optimize marketing campaigns across digital and traditional platforms. "
+                        "Responsibilities include content creation, market research, performance tracking, and collaboration with sales teams. "
+                        "A deep understanding of social media marketing, SEO, and data-driven decision-making is essential. "
+                        "Join us to help shape compelling brand narratives and increase market reach."
+                    ),
                     posted_by=1
                 ),
                 Job(
                     title="Customer Service Representative",
                     company="ConnectPro Solutions",
-                    description="""
-                    <br><h4>Be the Voice of Our Company</h4>
-                    <p>We are seeking a friendly and professional Customer Service Representative who can build trust with our clients and resolve issues with efficiency and empathy. You’ll handle support across email, chat, and phone to ensure high satisfaction and client retention.</p><br>
-                    <ul>
-                        <li>Handle inquiries, product support, and account updates</li>
-                        <li>Utilize CRM software to document and resolve issues</li>
-                        <li>Escalate technical issues as needed</li>
-                        <li>Maintain service-level standards and response times</li>
-                        <li>Contribute to knowledge base and FAQs</li>
-                    </ul>
-                    """,
+                    salary="$2,800 - $3,200",
+                    job_type="Part-time",
+                    location="Remote",
+                    posted_date=datetime.utcnow(),
+                    application_deadline=datetime.utcnow() + timedelta(days=30),
+                    description=(
+                        "Join ConnectPro Solutions as a Customer Service Representative and provide top-tier support to our diverse client base. "
+                        "This role requires excellent communication skills, empathy, and problem-solving ability to handle inquiries, complaints, and feedback effectively. "
+                        "You will engage with customers through multiple channels including phone, email, and live chat, ensuring timely resolutions and a positive customer experience. "
+                        "Flexible part-time hours allow for remote work in a dynamic and supportive environment."
+                    ),
                     posted_by=1
                 ),
                 Job(
                     title="Logistics Coordinator",
                     company="Global Freight Corp.",
-                    description="""
-                    <br><h4>Optimize Our Supply Chain</h4>
-                    <p>We're looking for a detail-oriented Logistics Coordinator to manage our supply chain operations and streamline processes for domestic and international shipping. This is a critical role for ensuring timely, cost-effective deliveries across the board.</p><br>
-                    <ul>
-                        <li>Coordinate shipment schedules with carriers and suppliers</li>
-                        <li>Track delivery progress and resolve transit issues</li>
-                        <li>Work with customs and documentation for international freight</li>
-                        <li>Maintain accurate inventory and shipping records</li>
-                        <li>Ensure compliance with safety and regulatory standards</li>
-                    </ul>
-                    """,
+                    salary="$4,200 - $5,200",
+                    job_type="Full-time",
+                    location="Dammam, Saudi Arabia",
+                    posted_date=datetime.utcnow(),
+                    application_deadline=datetime.utcnow() + timedelta(days=30),
+                    description=(
+                        "Global Freight Corp. is looking for an organized and detail-oriented Logistics Coordinator to manage shipping schedules, "
+                        "track inventory, and coordinate with carriers and warehouses. You will optimize transport routes, maintain compliance with regulations, "
+                        "and troubleshoot logistical challenges to ensure timely delivery of goods. "
+                        "Strong negotiation skills and proficiency with logistics software are required to succeed in this fast-paced role."
+                    ),
                     posted_by=1
                 ),
                 Job(
                     title="Financial Analyst",
                     company="AlphaCore Investments",
-                    description="""
-                    <br><h4>Support Business Decisions with Data</h4>
-                    <p>As a Financial Analyst, you’ll work closely with our leadership team to provide insight into business performance, evaluate opportunities, and guide financial strategy. Ideal for someone who enjoys making data tell a story.</p><br>
-                    <ul>
-                        <li>Develop financial models and forecasts</li>
-                        <li>Conduct variance and profitability analysis</li>
-                        <li>Assist with budgeting and strategic planning</li>
-                        <li>Present actionable insights to executives</li>
-                        <li>Monitor market trends and assess financial risk</li>
-                    </ul>
-                    """,
+                    salary="$5,000 - $6,500",
+                    job_type="Full-time",
+                    location="Riyadh, Saudi Arabia",
+                    posted_date=datetime.utcnow(),
+                    application_deadline=datetime.utcnow() + timedelta(days=30),
+                    description=(
+                        "AlphaCore Investments seeks a Financial Analyst to support investment decisions by conducting financial modeling, "
+                        "analyzing market trends, and preparing detailed reports. "
+                        "The successful candidate will work closely with portfolio managers and executives, providing actionable insights to optimize asset allocation. "
+                        "Expertise in Excel, financial databases, and strong analytical skills are a must for this role."
+                    ),
                     posted_by=1
                 ),
                 Job(
                     title="Event Planner",
                     company="Blue Horizon Events",
-                    description="""
-                    <br><h4>Create Memorable Experiences</h4>
-                    <p>Join our creative and driven event planning team! You'll be responsible for crafting unforgettable events for corporate clients, weddings, and galas. From initial concepts to on-site coordination, your attention to detail will shine.</p><br>
-                    <ul>
-                        <li>Manage full-cycle event planning and execution</li>
-                        <li>Source and manage vendor relationships</li>
-                        <li>Create event budgets and timelines</li>
-                        <li>Ensure client satisfaction and adherence to vision</li>
-                        <li>Coordinate staff and logistics on event day</li>
-                    </ul>
-                    """,
+                    salary="$3,000 - $4,000",
+                    job_type="Contract",
+                    location="Jeddah, Saudi Arabia",
+                    posted_date=datetime.utcnow(),
+                    application_deadline=datetime.utcnow() + timedelta(days=30),
+                    description=(
+                        "Blue Horizon Events is seeking an Event Planner to organize and execute corporate and social events from conception to completion. "
+                        "Responsibilities include vendor management, budgeting, scheduling, and client communication. "
+                        "You will ensure every event runs smoothly, meets client expectations, and adheres to timelines and budgets. "
+                        "This contract position demands excellent multitasking abilities and a passion for creativity."
+                    ),
                     posted_by=1
                 ),
                 Job(
                     title="UI/UX Designer",
                     company="PixelCrafters Studio",
-                    description="""
-                    <br><h4>Design Intuitive User Experiences</h4>
-                    <p>We're seeking a creative UI/UX Designer to craft beautiful and functional user interfaces across web and mobile platforms. You'll collaborate closely with product managers and developers to translate user needs into elegant designs.</p><br>
-                    <ul>
-                        <li>Develop wireframes, prototypes, and high-fidelity mockups</li>
-                        <li>Conduct user research and usability testing</li>
-                        <li>Maintain and evolve the design system</li>
-                        <li>Ensure responsive, accessible, and intuitive designs</li>
-                        <li>Collaborate across teams to implement feedback quickly</li>
-                    </ul>
-                    """,
+                    salary="$4,500 - $5,500",
+                    job_type="Full-time",
+                    location="Remote",
+                    posted_date=datetime.utcnow(),
+                    application_deadline=datetime.utcnow() + timedelta(days=30),
+                    description=(
+                        "PixelCrafters Studio is looking for a talented UI/UX Designer to create user-friendly digital experiences. "
+                        "You will collaborate with developers and product managers to design wireframes, prototypes, and user interfaces that are both visually appealing and functional. "
+                        "A strong portfolio demonstrating a deep understanding of user-centered design principles and proficiency with design tools is essential."
+                    ),
                     posted_by=1
                 ),
                 Job(
                     title="DevOps Engineer",
                     company="NextGen CloudOps",
-                    description="""
-                    <br><h4>Streamline Our Infrastructure</h4>
-                    <p>We're hiring a DevOps Engineer to build and maintain CI/CD pipelines, improve system reliability, and automate deployments across environments. This is a hands-on role ideal for someone passionate about performance and scalability.</p><br>
-                    <ul>
-                        <li>Implement infrastructure-as-code with tools like Terraform</li>
-                        <li>Manage CI/CD pipelines and automate release processes</li>
-                        <li>Monitor, troubleshoot, and improve system uptime</li>
-                        <li>Collaborate with development and QA teams</li>
-                        <li>Ensure security and compliance best practices</li>
-                    </ul>
-                    """,
+                    salary="$6,000 - $7,500",
+                    job_type="Full-time",
+                    location="Remote",
+                    posted_date=datetime.utcnow(),
+                    application_deadline=datetime.utcnow() + timedelta(days=30),
+                    description=(
+                        "NextGen CloudOps requires an experienced DevOps Engineer to automate infrastructure, monitor systems, "
+                        "and collaborate across development teams to improve deployment pipelines. "
+                        "You will be responsible for managing cloud environments, ensuring system reliability, and implementing CI/CD processes. "
+                        "Expertise with Docker, Kubernetes, AWS/Azure, and scripting languages is highly desired."
+                    ),
                     posted_by=1
                 ),
                 Job(
                     title="Sales Executive",
                     company="VertexTech Solutions",
-                    description="""
-                    <br><h4>Drive Growth Through Relationships</h4>
-                    <p>We're looking for a motivated Sales Executive to generate new business opportunities and build long-term client relationships. You’ll be working with cutting-edge software solutions and contributing directly to our growth targets.</p><br>
-                    <ul>
-                        <li>Identify and qualify leads through outreach and networking</li>
-                        <li>Present tailored product demos and proposals</li>
-                        <li>Negotiate contracts and close deals</li>
-                        <li>Track and report on pipeline progress</li>
-                        <li>Collaborate with marketing and customer success teams</li>
-                    </ul>
-                    """,
+                    salary="$4,000 - $6,000 + commission",
+                    job_type="Full-time",
+                    location="Riyadh, Saudi Arabia",
+                    posted_date=datetime.utcnow(),
+                    application_deadline=datetime.utcnow() + timedelta(days=30),
+                    description=(
+                        "VertexTech Solutions is seeking a motivated Sales Executive to drive revenue growth and build strong customer relationships. "
+                        "You will identify new business opportunities, manage client accounts, and close deals with a focus on exceeding sales targets. "
+                        "Excellent communication and negotiation skills, along with a results-driven mindset, are key to succeeding in this role."
+                    ),
                     posted_by=1
                 ),
             ]
@@ -172,5 +179,5 @@ def seed_data():
 seed_data()
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)
     app.run(host="0.0.0.0", port=5000)

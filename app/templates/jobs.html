@@ -1,50 +1,182 @@
-{% extends 'base.html' %}
-{% block title %}Available Jobs{% endblock %}
+{% extends "base.html" %}
+
+{% block title %}Jobs - JobPortal{% endblock %}
 
 {% block content %}
-<h2 class="page-heading">Available Jobs</h2>
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Available Jobs</h1>
+            <p class="text-gray-600">Discover your next career opportunity</p>
+        </div>
 
-<div class="card-container" id="job-list">
-  <p>Loading jobs...</p>
+        <!-- Search and Filters -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+            <form id="job-search-form" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="md:col-span-2">
+                    <div class="relative">
+                        <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400"></i>
+                        <input
+                            type="text"
+                            name="search"
+                            id="search"
+                            placeholder="Search jobs, companies, or keywords..."
+                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <div class="relative">
+                        <i data-lucide="map-pin" class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400"></i>
+                        <input
+                            type="text"
+                            name="location"
+                            id="location"
+                            placeholder="Riyadh"
+                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <div class="relative">
+                        <i data-lucide="filter" class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400"></i>
+                        <select
+                            name="type"
+                            id="type"
+                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 appearance-none"
+                        >
+                            <option value="">All Types</option>
+                            <option value="Full-time">Full-time</option>
+                            <option value="Part-time">Part-time</option>
+                            <option value="Contract">Contract</option>
+                            <option value="Remote">Remote</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="md:col-start-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                    Search
+                </button>
+            </form>
+        </div>
+
+        <!-- Results Summary -->
+        <div class="mb-6">
+            <p class="text-gray-600" id="results-count">Showing 0 jobs</p>
+        </div>
+
+        <!-- Job Listings -->
+        <div class="space-y-6" id="job-list">
+            <div class="text-center py-12 text-gray-400">Loading jobs...</div>
+        </div>
+    </div>
 </div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    fetch('/api/v1/jobs')
-      .then(response => response.json())
-      .then(data => {
-        const jobList = document.getElementById('job-list');
-        jobList.innerHTML = '';
+document.addEventListener('DOMContentLoaded', function () {
+    const jobList = document.getElementById('job-list');
+    const form = document.getElementById('job-search-form');
+    const count = document.getElementById('results-count');
 
-        if (data.length === 0) {
-          jobList.innerHTML = `
-            <div class="no-applications">
-              <p>No jobs available at the moment. Please check back later!</p>
-            </div>
-          `;
-          return;
+    function renderJobs(jobs) {
+        jobList.innerHTML = '';
+        count.textContent = `Showing ${jobs.length} job${jobs.length !== 1 ? 's' : ''}`;
+
+        if (jobs.length === 0) {
+            jobList.innerHTML = `
+                <div class="text-center py-12">
+                    <div class="text-gray-400 mb-4">
+                        <i data-lucide="search" class="h-12 w-12 mx-auto"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">No jobs found</h3>
+                    <p class="text-gray-600">Try adjusting your search criteria</p>
+                </div>
+            `;
+            return;
         }
 
-        data.forEach(job => {
-          const card = document.createElement('div');
-          card.className = 'card';
-          card.innerHTML = `
-            <h3 class="job-title">${job.title}</h3>
-            <p class="job-company"> ${job.company}</p>
-            <br>
-            <a class="btn" href="/jobs/${job.id}">View Details</a>
-          `;
-          jobList.appendChild(card);
+        jobs.forEach(job => {
+            const requirements = job.requirements ? job.requirements.split(',') : [];
+            const jobCard = document.createElement('div');
+            jobCard.className = "bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow";
+
+            jobCard.innerHTML = `
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex-1">
+                            <a href="/jobs/${job.id}" class="text-xl font-semibold text-gray-900 hover:text-blue-600 transition-colors">
+                                ${job.title}
+                            </a>
+                            <p class="text-lg text-gray-600 mt-1">${job.company}</p>
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-sm font-medium ${
+                            job.job_type === 'Full-time' ? 'bg-green-100 text-green-800' :
+                            job.job_type === 'Part-time' ? 'bg-yellow-100 text-yellow-800' :
+                            job.job_type === 'Contract' ? 'bg-purple-100 text-purple-800' :
+                            'bg-blue-100 text-blue-800'
+                        }">${job.job_type}</span>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-4">
+                        <div class="flex items-center">
+                            <i data-lucide="map-pin" class="h-4 w-4 mr-1"></i>
+                            ${job.location}
+                        </div>
+                        <div class="flex items-center">
+                            <i data-lucide="dollar-sign" class="h-4 w-4 mr-1"></i>
+                            ${job.salary}
+                        </div>
+                        <div class="flex items-center">
+                            <i data-lucide="calendar" class="h-4 w-4 mr-1"></i>
+                            Posted ${new Date(job.posted_date).toLocaleDateString()}
+                        </div>
+                    </div>
+
+
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        ${requirements.slice(0, 3).map(req => `
+                            <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-sm">${req.trim()}</span>
+                        `).join('')}
+                        ${requirements.length > 3 ? `<span class="text-gray-500 text-sm">+${requirements.length - 3} more</span>` : ''}
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <div class="text-sm text-gray-500">
+                            Apply by ${new Date(job.application_deadline).toLocaleDateString()}
+                        </div>
+                        <a href="/jobs/${job.id}" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+            `;
+
+            jobList.appendChild(jobCard);
         });
-      })
-      .catch(error => {
-        console.error('Error loading jobs:', error);
-        document.getElementById('job-list').innerHTML = `
-          <div class="no-applications">
-            <p>Failed to load jobs. Please try again later.</p>
-          </div>
-        `;
-      });
-  });
+
+        lucide.createIcons();
+    }
+
+    function fetchJobs() {
+        const params = new URLSearchParams(new FormData(form)).toString();
+        jobList.innerHTML = '<div class="text-center py-12 text-gray-400">Loading jobs...</div>';
+        fetch(`/api/v1/jobs?${params}`)
+            .then(res => res.json())
+            .then(renderJobs)
+            .catch(err => {
+                console.error('Failed to fetch jobs:', err);
+                jobList.innerHTML = `<div class="text-red-500 text-center">Failed to load jobs. Try again later.</div>`;
+            });
+    }
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        fetchJobs();
+    });
+
+    fetchJobs(); // Load on page load
+});
 </script>
 {% endblock %}
