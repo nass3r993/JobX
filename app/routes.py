@@ -17,6 +17,16 @@ from flask_wtf.csrf import validate_csrf
 from flask import abort
 from flask_wtf import FlaskForm
 from . import csrf
+import re
+
+
+
+def is_valid_phone(phone):
+    # Regex: starts with '05' and then 8 digits (total 10 digits)
+    return bool(re.fullmatch(r'05\d{8}', phone))
+def is_valid_email(email):
+    # Basic email regex: something@something.something
+    return bool(re.fullmatch(r"[^@]+@[^@]+\.[^@]+", email))
 
 
 bp = Blueprint('main', __name__)
@@ -65,6 +75,14 @@ def register():
 
         if password != confirm_password:
             flash("Passwords do not match.", "danger")
+            return render_template('register.html')
+        
+        if not is_valid_phone(phone):
+            flash("Phone number must be in the format 05xxxxxxxx (10 digits, starting with 05).", "danger")
+            return render_template('register.html')
+
+        if not is_valid_email(email):
+            flash("Invalid email format.", "danger")
             return render_template('register.html')
 
         try:
@@ -123,6 +141,9 @@ def update_profile():
     bio = request.form.get('bio', '').strip()
     experience = request.form.get('experience', '').strip()
     skills = request.form.get('skills', '').strip()
+    if not is_valid_phone(phone):
+        flash("Phone number must be in the format 05xxxxxxxx (10 digits, starting with 05).", "danger")
+        return render_template('profile.html')
 
     # Update user fields
     current_user.name = first_name
@@ -179,7 +200,7 @@ def api_jobs():
     if job_type:
         query = query.filter(Job.job_type == job_type)
 
-    # ⚠️ SQLi-vulnerable partial match
+
     if location:
         unsafe_condition = f"LOWER(location) LIKE '%%{location.lower()}%%'"
         query = query.filter(text(unsafe_condition))
