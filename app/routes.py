@@ -114,12 +114,14 @@ def register():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        email = form.email.data.strip().lower()  # normalize email
+        user = User.query.filter_by(email=email).first()
         if user and check_password_hash(user.password, form.password.data):
             login_user(user)
             return redirect(url_for('main.profile'))
-        flash('Invalid credentials')
+        flash('Invalid credentials', 'danger')
     return render_template('login.html', form=form)
+
 
 @bp.route('/logout')
 @login_required
