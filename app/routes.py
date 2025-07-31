@@ -60,6 +60,9 @@ def register():
         password = request.form.get('password')
         confirm_password = request.form.get('confirmPassword')
         csrf_token = request.form.get('csrf_token')
+        # Normalize email to lowercase
+        if email:
+            email = email.strip().lower()
 
         # If using Flask-WTF CSRF protection globally
         from flask_wtf.csrf import validate_csrf

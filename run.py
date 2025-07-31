@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from app import create_app, db
-from app.models import Job, User
+from app.models import Job, User, Application
 from werkzeug.security import generate_password_hash
 
 app = create_app()
@@ -8,10 +8,10 @@ app = create_app()
 def seed_data():
     with app.app_context():
         db.create_all()
-
-        if not User.query.filter_by(email="admin@Careerly.com").first():
+        user = User.query.filter_by(email="admin@careerly.com").first()
+        if not User.query.filter_by(email="admin@careerly.com").first():
             user = User(
-                email="admin@Careerly.com",
+                email="admin@careerly.com",
                 name="Nasser Mohammed",
                 phone="05399997502",
                 address="Riyadh, Saudi Arabia",
@@ -175,6 +175,18 @@ def seed_data():
             ]
             db.session.bulk_save_objects(jobs)
             db.session.commit()
+            
+        # Add dummy applications from admin user
+        existing_apps = Application.query.filter_by(user_id=user.id).first()
+        if not existing_apps:
+            all_jobs = Job.query.all()
+            applications = [
+                Application(user_id=user.id, job_id=job.id, status='Submitted')
+                for job in all_jobs
+            ]
+            db.session.bulk_save_objects(applications)
+            db.session.commit()
+            print(f"Seeded {len(applications)} applications for admin@careerly.com")
 
 seed_data()
 
